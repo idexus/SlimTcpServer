@@ -128,7 +128,7 @@ public class SlimClient
 
     public async Task<string> ReadAsync()
     {
-        await messagesSemaphore.WaitAsync();
+        await messagesSemaphore.WaitAsync(cancellationTokenSource.Token);
         messagesQueue.TryDequeue(out var result);
         return result!;
     }
