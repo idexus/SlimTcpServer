@@ -1,4 +1,6 @@
-﻿namespace SlimMessenger;
+﻿using System.Net;
+
+namespace SlimMessenger;
 
 // server
 
@@ -8,3 +10,5 @@ public delegate void ServerEventHandler(SlimServer server);
 
 public delegate void ClientEventHandler(SlimClient client);
 public delegate Task ClientRunLoop(SlimClient client);
+
+public delegate void ConnectionResultHandler(bool success, IPAddress serverIP, int serverPort);

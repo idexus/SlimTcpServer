@@ -15,6 +15,8 @@ class Program
 
         client.ClientConnected += client => Console.WriteLine("Client connected");
         client.ClientDisconnected += client => Console.WriteLine("Client disconnected");
+        client.ConnectedToServerEndPoint += (bool success, IPAddress serverIP, int serverPort)
+            => Console.WriteLine($"Connected to end point: {success} - {serverIP} port: {serverPort}");
 
         try
         {

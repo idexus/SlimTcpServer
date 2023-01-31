@@ -26,6 +26,7 @@ public class SlimClient
 
     public event ClientEventHandler? ClientConnected;
     public event ClientEventHandler? ClientDisconnected;
+    public event ConnectionResultHandler? ConnectedToServerEndPoint;
 
     public bool IsConnected => logicClient.Connected && !cancellationTokenSource.IsCancellationRequested;
 
@@ -49,30 +50,35 @@ public class SlimClient
     // conection methods
 
     public Task Connect(string serverAddress, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
-        => Connect(new IPAddress[] { IPAddress.Parse(serverAddress) }, serverPort, timeout);
+        => Connect(new IPAddress[] { IPAddress.Parse(serverAddress) }, new[] { serverPort }, timeout);
 
     public Task Connect(IPAddress serverIP, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
-         => Connect(new IPAddress[] { serverIP }, serverPort, timeout);
-    
-    public async Task Connect(IPAddress[] serverIPs, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
+        => Connect(new IPAddress[] { serverIP }, new[] { serverPort }, timeout);
+
+    public async Task Connect(IPAddress[] serverIPs, int[] serverPorts, int timeout = DefaultTimeout)
     {
         foreach (var serverIP in serverIPs)
-        {
-            try
+            foreach (var serverPort in serverPorts)
             {
-                var timeoutCancellationToken = new CancellationTokenSource(timeout).Token;
-                var connectionCancellationToken
-                    = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
-                var ipEndPoint = new IPEndPoint(serverIP, serverPort)!;
-                await logicClient.ConnectAsync(ipEndPoint, connectionCancellationToken);
-                ServerAddress = serverIP;
-                ServerPort = serverPort;
-                break;
-            }
-            catch { }
-        }
+                try
+                {
+                    var timeoutCancellationToken = new CancellationTokenSource(timeout).Token;
+                    var connectionCancellationToken
+                        = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
+                    var ipEndPoint = new IPEndPoint(serverIP, serverPort)!;
+                    await logicClient.ConnectAsync(ipEndPoint, connectionCancellationToken);
+                    ServerAddress = serverIP;
+                    ServerPort = serverPort;
+                    ConnectedToServerEndPoint?.Invoke(true, serverIP, serverPort);
+                    break;
+                }
+                catch
+                {
+                    ConnectedToServerEndPoint?.Invoke(false, serverIP, serverPort);
+                }
+            }    
 
-        if (!logicClient.Connected) throw new TimeoutException();
+        if (!logicClient.Connected) throw new SocketException();
 
         StartRunLoop();
     }
