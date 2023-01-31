@@ -16,8 +16,8 @@ class Program
 
             server.ServerStarted += server => Console.WriteLine($"Server started");
             server.ServerStopped += server => Console.WriteLine($"Server stopped");
-            server.ClientConnected += Server_ClientConnected;
-            server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");
+            server.ClientConnected += client => Server_ClientConnected(client);
+            server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");           
 
             server.Start();
 
@@ -33,21 +33,26 @@ class Program
 
     static void Server_ClientConnected(SlimClient client)
     {
-        client.DataReceived += Client_DataReceived;
         Console.WriteLine($"Client connected: {client.Guid}");
+        Task.Run(() => ClientRunLoop(client));
     }
 
-    static void Client_DataReceived(SlimClient client, string message)
+    static async Task ClientRunLoop(SlimClient client)
     {
-        Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
-        if (message == "close")
+        await client.WriteAsync($"Hello, your Guid: {client.Guid}");
+        while (client.IsConnected)
         {
-            Console.WriteLine($"Client close request");
-            client.Disconnect();
-        }
-        else if (message == "play")
-        {
-            Task.Run(() => client.WriteAsync("Lets play"));
+            var message = await client.ReadAsync();
+            Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
+            if (message == "close")
+            {
+                Console.WriteLine($"Client close request");
+                client.Disconnect();
+            }
+            else if (message == "play")
+            {
+                await client.WriteAsync("Lets play");
+            }
         }
     }
 }

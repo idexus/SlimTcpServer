@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -13,6 +14,7 @@ public class SlimClient
 
     // private
 
+    readonly ConcurrentQueue<string> messagesQueue = new ConcurrentQueue<string>();
     TcpClient logicClient;
     CancellationTokenSource cancellationTokenSource;
 
@@ -22,10 +24,8 @@ public class SlimClient
 
     public event ClientEventHandler? ClientConnected;
     public event ClientEventHandler? ClientDisconnected;
-    public event DataReceivedEventHandler? DataReceived;
 
-    public bool IsConnected => logicClient.Connected;
-    public bool IsDisconnectionRequested => cancellationTokenSource.IsCancellationRequested;
+    public bool IsConnected => logicClient.Connected && !cancellationTokenSource.IsCancellationRequested;
 
     public void Disconnect() => cancellationTokenSource.Cancel();
 
@@ -70,14 +70,16 @@ public class SlimClient
 
         if (!logicClient.Connected) throw new TimeoutException();
 
-        StartReceiveLoop();
+        StartRunLoop();
     }
 
-    internal void StartReceiveLoop()
+    internal void StartRunLoop()
     {
-        Task.Factory.StartNew(ReceiveRunLoop, TaskCreationOptions.LongRunning);
+        messagesSemaphore = new SemaphoreSlim(0);
+        Task.Run(ReceiveRunLoop);
     }
 
+    SemaphoreSlim messagesSemaphore = new SemaphoreSlim(0);
     async Task ReceiveRunLoop()
     {
         ClientConnected?.Invoke(this);
@@ -86,7 +88,7 @@ public class SlimClient
         string partialMessage = "";
         try
         {
-            while (!IsDisconnectionRequested)
+            while (!cancellationTokenSource.IsCancellationRequested)
             {
                 int bytesReceived = await logicClient.GetStream().ReadAsync(buffer, cancellationTokenSource.Token);
                 if (bytesReceived == 0) break;
@@ -99,8 +101,11 @@ public class SlimClient
                 partialMessage = stringList.Last();
                 stringList.RemoveAt(stringList.Count - 1);
 
-                foreach(var message in stringList)
-                    DataReceived?.Invoke(this, message);
+                foreach (var message in stringList)
+                {
+                    messagesQueue.Enqueue(message);
+                    messagesSemaphore.Release();
+                }
             }
         }
         catch (Exception ex)
@@ -119,5 +124,12 @@ public class SlimClient
         dataString += "\0";
         var messageBytes = Encoding.UTF8.GetBytes(dataString);
         if (logicClient.Connected) await logicClient.GetStream().WriteAsync(messageBytes, cancellationTokenSource.Token);
+    }
+
+    public async Task<string> ReadAsync()
+    {
+        await messagesSemaphore.WaitAsync();
+        messagesQueue.TryDequeue(out var result);
+        return result!;
     }
 }

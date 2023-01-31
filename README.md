@@ -21,8 +21,8 @@ class Program
 
             server.ServerStarted += server => Console.WriteLine($"Server started");
             server.ServerStopped += server => Console.WriteLine($"Server stopped");
-            server.ClientConnected += Server_ClientConnected;
-            server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");
+            server.ClientConnected += client => Server_ClientConnected(client);
+            server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");           
 
             server.Start();
 
@@ -38,21 +38,26 @@ class Program
 
     static void Server_ClientConnected(SlimClient client)
     {
-        client.DataReceived += Client_DataReceived;
         Console.WriteLine($"Client connected: {client.Guid}");
+        Task.Run(() => ClientRunLoop(client));
     }
 
-    static void Client_DataReceived(SlimClient client, string message)
+    static async Task ClientRunLoop(SlimClient client)
     {
-        Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
-        if (message == "close")
+        await client.WriteAsync($"Hello, your Guid: {client.Guid}");
+        while (client.IsConnected)
         {
-            Console.WriteLine($"Client close request");
-            client.Disconnect();
-        }
-        else if (message == "play")
-        {
-            Task.Run(() => client.WriteAsync("Lets play"));
+            var message = await client.ReadAsync();
+            Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
+            if (message == "close")
+            {
+                Console.WriteLine($"Client close request");
+                client.Disconnect();
+            }
+            else if (message == "play")
+            {
+                await client.WriteAsync("Lets play");
+            }
         }
     }
 }
@@ -71,14 +76,13 @@ class Program
 
         var client = new SlimClient();
 
-        client.DataReceived += Client_DataReceived;
         client.ClientConnected += client => Console.WriteLine("Client connected");
         client.ClientDisconnected += client => Console.WriteLine("Client disconnected");
 
         try
         {
             client.Connect("127.0.0.1").Wait();
-            SendMessages(client);
+            Task.Run(() => ClientRunLoop(client)).Wait();
         }
         catch (Exception ex)
         {
@@ -86,14 +90,11 @@ class Program
         }
     }
 
-    static void Client_DataReceived(SlimClient client, string message)
+    static async Task ClientRunLoop(SlimClient client)
     {
-        Console.WriteLine($@"Server sent data : ""{message}""");
-    }
-
-    static void SendMessages(SlimClient client)
-    {
-        while (!client.IsDisconnectionRequested)
+        var serverMessage = await client.ReadAsync();
+        Console.WriteLine(serverMessage);
+        while (client.IsConnected)
         {
             var sendMsg = Console.ReadLine()!;
             sendMsg = sendMsg.Replace('`', '\0');
@@ -111,10 +112,10 @@ Client side
 ```
 SlimMessenger - Client
 Client connected
-Hello, World!
+Hello, your Guid: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
+Hello, I'm your client
 This is`a test
 play
-Server sent data : "Let's play"
 close
 Client disconnected
 ```
@@ -124,14 +125,15 @@ Server side
 ```
 SlimMessenger - Server
 Server started
-Client connected: 342509ba-4c5b-4f90-93e6-8ea3bca363d5
-Client: 342509ba-4c5b-4f90-93e6-8ea3bca363d5, data received : "Hello, World!"
-Client: 342509ba-4c5b-4f90-93e6-8ea3bca363d5, data received : "This is"
-Client: 342509ba-4c5b-4f90-93e6-8ea3bca363d5, data received : "a test"
-Client: 342509ba-4c5b-4f90-93e6-8ea3bca363d5, data received : "play"
-Client: 342509ba-4c5b-4f90-93e6-8ea3bca363d5, data received : "close"
+Client connected: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
+Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "Hello, I'm your client"
+Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "This is"
+Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "a test"
+Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "play"
+Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "close"
 Client close request
-Client disconnected: 342509ba-4c5b-4f90-93e6-8ea3bca363d5
+The operation was canceled.
+Client disconnected: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 ```
 
 # License 

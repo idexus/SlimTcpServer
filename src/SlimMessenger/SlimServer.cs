@@ -71,7 +71,7 @@ public class SlimServer
                     ClientDisconnected?.Invoke(e);
                 };
 
-                clientSlim.StartReceiveLoop();
+                clientSlim.StartRunLoop();
             }
         }
         catch (Exception ex)
