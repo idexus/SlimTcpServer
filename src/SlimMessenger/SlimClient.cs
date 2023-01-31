@@ -78,6 +78,7 @@ public class SlimClient
                 {
                     ConnectedToServerEndPoint?.Invoke(false, serverIP, serverPort);
                 }
+                logicClient = new();
             }    
 
         if (!logicClient.Connected) throw new SocketException();
