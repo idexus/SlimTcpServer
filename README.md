@@ -1,6 +1,6 @@
 # SlimMessenger
 
-A simple TCP string messaganger
+A simple TCP string messenger
 
 # Example Usage
 
