@@ -5,9 +5,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace TcpServerSlim;
+namespace SlimMessenger;
 
-public class TcpClientSlim
+public class SlimClient
 {
     public const int DefaultTimeout = 1000;
 
@@ -31,13 +31,13 @@ public class TcpClientSlim
 
     // constructors
 
-    public TcpClientSlim()
+    public SlimClient()
     {
         this.logicClient = new();
         this.cancellationTokenSource = new CancellationTokenSource();
     }
 
-    internal TcpClientSlim(TcpClient logicClient, Guid guid, CancellationTokenSource cancellationTokenSource)
+    internal SlimClient(TcpClient logicClient, Guid guid, CancellationTokenSource cancellationTokenSource)
     {
         this.logicClient = logicClient;
         this.Guid = guid;
@@ -46,13 +46,13 @@ public class TcpClientSlim
 
     // conection methods
 
-    public Task Connect(string serverAddress, int serverPort = TcpServerSlim.DefaultServerPort, int timeout = DefaultTimeout)
+    public Task Connect(string serverAddress, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
         => Connect(new IPAddress[] { IPAddress.Parse(serverAddress) }, serverPort, timeout);
 
-    public Task Connect(IPAddress serverIP, int serverPort = TcpServerSlim.DefaultServerPort, int timeout = DefaultTimeout)
+    public Task Connect(IPAddress serverIP, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
          => Connect(new IPAddress[] { serverIP }, serverPort, timeout);
     
-    public async Task Connect(IPAddress[] serverIPs, int serverPort = TcpServerSlim.DefaultServerPort, int timeout = DefaultTimeout)
+    public async Task Connect(IPAddress[] serverIPs, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
     {
         foreach (var serverIP in serverIPs)
         {

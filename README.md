@@ -1,13 +1,13 @@
-# TcpServerSlim
+# SlimMessenger
 
-A simple TCP server and client for sending string messages
+A simple TCP string messaganger
 
 # Example Usage
 
 ## Server
 
 ```cs
-using TcpServerSlim;
+using SlimMessenger;
 
 class Program
 {
@@ -15,9 +15,9 @@ class Program
     {
         try
         {
-            Console.WriteLine("TcpServer.Slim - Server");
+            Console.WriteLine("SlimMessenger - Server");
 
-            var server = new TcpServerSlim();
+            var server = new SlimServer();
 
             server.ServerStarted += server => Console.WriteLine($"Server started");
             server.ServerStopped += server => Console.WriteLine($"Server stopped");
@@ -36,13 +36,13 @@ class Program
         }
     }
 
-    static void Server_ClientConnected(TcpClientSlim client)
+    static void Server_ClientConnected(SlimClient client)
     {
         client.DataReceived += Client_DataReceived;
         Console.WriteLine($"Client connected: {client.Guid}");
     }
 
-    static void Client_DataReceived(TcpClientSlim client, string message)
+    static void Client_DataReceived(SlimClient client, string message)
     {
         Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
         if (message == "close")
@@ -61,16 +61,15 @@ class Program
 ## Client
 
 ```cs
-using System.Net;
-using TcpServerSlim;
+using SlimMessenger;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("TcpServer.Slim - Client");
+        Console.WriteLine("SlimMessenger - Client");
 
-        var client = new TcpClientSlim();
+        var client = new SlimClient();
 
         client.DataReceived += Client_DataReceived;
         client.ClientConnected += client => Console.WriteLine("Client connected");
@@ -87,12 +86,12 @@ class Program
         }
     }
 
-    static void Client_DataReceived(TcpClientSlim client, string message)
+    static void Client_DataReceived(SlimClient client, string message)
     {
         Console.WriteLine($@"Server sent data : ""{message}""");
     }
 
-    static void SendMessages(TcpClientSlim client)
+    static void SendMessages(SlimClient client)
     {
         while (!client.IsDisconnectionRequested)
         {
@@ -110,7 +109,7 @@ class Program
 Client side
 
 ```
-TcpServerSlim - Client
+SlimMessenger - Client
 Client connected
 Hello, World!
 This is`a test
@@ -123,7 +122,7 @@ Client disconnected
 Server side
 
 ```
-TcpServerSlim - Server
+SlimMessenger - Server
 Server started
 Client connected: 342509ba-4c5b-4f90-93e6-8ea3bca363d5
 Client: 342509ba-4c5b-4f90-93e6-8ea3bca363d5, data received : "Hello, World!"

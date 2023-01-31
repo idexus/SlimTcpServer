@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <PackageId>TcpServerSlim</PackageId>
-	<Version>0.1.1-alpha.1</Version>
+    <PackageId>SlimMessenger</PackageId>
+	<Version>0.2.0-alpha.1</Version>
 	<Authors>Pawel Krzywdzinski</Authors>
 	<Copyright>Pawel Krzywdzinski</Copyright>
-	<PackageDescription>A simple TCP server and client for sending string messages</PackageDescription>
+	<PackageDescription>A simple TCP string messenger</PackageDescription>
 	<Company></Company>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageReadmeFile>README.md</PackageReadmeFile>

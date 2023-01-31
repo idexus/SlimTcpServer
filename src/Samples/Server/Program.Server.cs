@@ -2,7 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
-using TcpServerSlim;
+using SlimMessenger;
 
 class Program
 {
@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            Console.WriteLine("TcpServer.Slim - Server");
+            Console.WriteLine("SlimMessenger - Server");
 
-            var server = new TcpServerSlim();
+            var server = new SlimServer();
 
             server.ServerStarted += server => Console.WriteLine($"Server started");
             server.ServerStopped += server => Console.WriteLine($"Server stopped");
@@ -31,13 +31,13 @@ class Program
         }
     }
 
-    static void Server_ClientConnected(TcpClientSlim client)
+    static void Server_ClientConnected(SlimClient client)
     {
         client.DataReceived += Client_DataReceived;
         Console.WriteLine($"Client connected: {client.Guid}");
     }
 
-    static void Client_DataReceived(TcpClientSlim client, string message)
+    static void Client_DataReceived(SlimClient client, string message)
     {
         Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
         if (message == "close")

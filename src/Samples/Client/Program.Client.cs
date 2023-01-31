@@ -2,15 +2,15 @@
 
 using System;
 using System.Net;
-using TcpServerSlim;
+using SlimMessenger;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("TcpServer.Slim - Client");
+        Console.WriteLine("SlimMessenger - Client");
 
-        var client = new TcpClientSlim();
+        var client = new SlimClient();
 
         client.DataReceived += Client_DataReceived;
         client.ClientConnected += client => Console.WriteLine("Client connected");
@@ -27,12 +27,12 @@ class Program
         }
     }
 
-    static void Client_DataReceived(TcpClientSlim client, string message)
+    static void Client_DataReceived(SlimClient client, string message)
     {
         Console.WriteLine($@"Server sent data : ""{message}""");
     }
 
-    static void SendMessages(TcpClientSlim client)
+    static void SendMessages(SlimClient client)
     {
         while (!client.IsDisconnectionRequested)
         {

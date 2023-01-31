@@ -8,6 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TcpServerSlim\TcpServerSlim.csproj" />
+    <ProjectReference Include="..\..\SlimMessenger\SlimMessenger.csproj" />
   </ItemGroup>
 </Project>

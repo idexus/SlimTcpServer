@@ -3,13 +3,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace TcpServerSlim;
+namespace SlimMessenger;
 
-public class TcpServerSlim
+public class SlimServer
 {
     // private
 
-    readonly ConcurrentDictionary<Guid, TcpClientSlim> clientDictionary = new ConcurrentDictionary<Guid, TcpClientSlim>();
+    readonly ConcurrentDictionary<Guid, SlimClient> clientDictionary = new ConcurrentDictionary<Guid, SlimClient>();
     TcpListener listener;
     CancellationTokenSource cancellationTokenSource;
 
@@ -28,7 +28,7 @@ public class TcpServerSlim
 
     // constructor
 
-    public TcpServerSlim(int serverPort = DefaultServerPort)
+    public SlimServer(int serverPort = DefaultServerPort)
     {
         cancellationTokenSource = new CancellationTokenSource();
 
@@ -61,7 +61,7 @@ public class TcpServerSlim
                 var client = await listener.AcceptTcpClientAsync(cancellationTokenSource.Token);
 
                 var clientGuid = Guid.NewGuid();
-                var clientSlim = new TcpClientSlim(client, clientGuid, CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token));
+                var clientSlim = new SlimClient(client, clientGuid, CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token));
                 clientDictionary[clientGuid] = clientSlim;
 
                 clientSlim.ClientConnected += e => ClientConnected?.Invoke(e);
