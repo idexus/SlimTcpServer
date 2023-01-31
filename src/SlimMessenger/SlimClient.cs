@@ -72,7 +72,9 @@ public class SlimClient
                     ConnectedToServerEndPoint?.Invoke(true, serverIP, serverPort);
                     break;
                 }
+#pragma warning disable CS0168
                 catch (Exception ex)
+#pragma warning restore CS0168
                 {
                     ConnectedToServerEndPoint?.Invoke(false, serverIP, serverPort);
                 }
