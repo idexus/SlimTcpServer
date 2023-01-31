@@ -15,7 +15,7 @@ public class SlimServer
 
     // public
 
-    public const int DefaultServerPort = 9988;
+    public const int DefaultServerPort = 5095;
 
     public event ServerEventHandler? ServerStarted;
     public event ServerEventHandler? ServerStopped;
