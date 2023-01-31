@@ -72,7 +72,7 @@ public class SlimClient
                     ConnectedToServerEndPoint?.Invoke(true, serverIP, serverPort);
                     break;
                 }
-                catch
+                catch (Exception ex)
                 {
                     ConnectedToServerEndPoint?.Invoke(false, serverIP, serverPort);
                 }
