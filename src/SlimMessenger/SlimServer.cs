@@ -82,7 +82,9 @@ public class SlimServer
         foreach (var client in clientDictionary.Values)
             client.Disconnect();
         listener.Stop();
+
         clientDictionary.Clear();
+
         ServerStopped?.Invoke(this);
         IsRunning = false;
     }

@@ -111,7 +111,6 @@ public class SlimClient
         cancellationTokenSource.Cancel();
         logicClient.Close();
 
-
         ClientDisconnected?.Invoke(this);
     }
 
