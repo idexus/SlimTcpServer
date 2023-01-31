@@ -86,6 +86,7 @@ public class SlimClient
                 {
                     ConnectedToServerEndPoint?.Invoke(false, serverIP, serverPort);
                 }
+                logicClient = new();
             }
     }
 
