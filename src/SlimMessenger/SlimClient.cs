@@ -57,6 +57,14 @@ public class SlimClient
 
     public async Task Connect(IPAddress[] serverIPs, int[] serverPorts, int timeout = DefaultTimeout)
     {
+        await ConnectToEndPoint(serverIPs, serverPorts, timeout);
+        if (!logicClient.Connected) throw new SocketException();
+
+        StartRunLoop();
+    }
+
+    async Task ConnectToEndPoint(IPAddress[] serverIPs, int[] serverPorts, int timeout)
+    {
         foreach (var serverIP in serverIPs)
             foreach (var serverPort in serverPorts)
             {
@@ -70,7 +78,7 @@ public class SlimClient
                     ServerAddress = serverIP;
                     ServerPort = serverPort;
                     ConnectedToServerEndPoint?.Invoke(true, serverIP, serverPort);
-                    break;
+                    return;
                 }
 #pragma warning disable CS0168
                 catch (Exception ex)
@@ -78,11 +86,7 @@ public class SlimClient
                 {
                     ConnectedToServerEndPoint?.Invoke(false, serverIP, serverPort);
                 }
-            }    
-
-        if (!logicClient.Connected) throw new SocketException();
-
-        StartRunLoop();
+            }
     }
 
     internal void StartRunLoop()
