@@ -21,6 +21,8 @@ public class SlimClient
     // public
 
     public Guid? Guid { get; private set; }
+    public IPAddress? ServerAddress { get; private set; }
+    public int? ServerPort { get; private set; }
 
     public event ClientEventHandler? ClientConnected;
     public event ClientEventHandler? ClientDisconnected;
@@ -63,6 +65,8 @@ public class SlimClient
                     = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
                 var ipEndPoint = new IPEndPoint(serverIP, serverPort)!;
                 await logicClient.ConnectAsync(ipEndPoint, connectionCancellationToken);
+                ServerAddress = serverIP;
+                ServerPort = serverPort;
                 break;
             }
             catch { }
