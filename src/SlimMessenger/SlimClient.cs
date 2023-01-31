@@ -76,7 +76,7 @@ public class SlimClient
     internal void StartRunLoop()
     {
         messagesSemaphore = new SemaphoreSlim(0);
-        Task.Run(ReceiveRunLoop);
+        _ = ReceiveRunLoop();
     }
 
     SemaphoreSlim messagesSemaphore = new SemaphoreSlim(0);

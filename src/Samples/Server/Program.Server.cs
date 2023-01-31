@@ -34,7 +34,7 @@ class Program
     static void Server_ClientConnected(SlimClient client)
     {
         Console.WriteLine($"Client connected: {client.Guid}");
-        Task.Run(() => ClientRunLoop(client));
+        _ = ClientRunLoop(client);
     }
 
     static async Task ClientRunLoop(SlimClient client)

@@ -19,7 +19,7 @@ class Program
         try
         {
             client.Connect("127.0.0.1").Wait();
-            Task.Run(() => ClientRunLoop(client)).Wait();
+            ClientRunLoop(client).Wait();
         }
         catch (Exception ex)
         {
