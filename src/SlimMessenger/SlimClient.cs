@@ -21,12 +21,12 @@ public class SlimClient
     // public
 
     public Guid? Guid { get; private set; }
-    public IPAddress? ServerAddress { get; private set; }
+    public IPAddress? ServerIP { get; private set; }
     public int? ServerPort { get; private set; }
 
     public event ClientEventHandler? ClientConnected;
     public event ClientEventHandler? ClientDisconnected;
-    public event ConnectionResultHandler? ConnectedToServerEndPoint;
+    public event ClientConnectedToEndPointEventHandler? ClientConnectedToEndPoint;
 
     public bool IsConnected => logicClient.Connected && !cancellationTokenSource.IsCancellationRequested;
 
@@ -75,16 +75,16 @@ public class SlimClient
                         = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
                     var ipEndPoint = new IPEndPoint(serverIP, serverPort)!;
                     await logicClient.ConnectAsync(ipEndPoint, connectionCancellationToken);
-                    ServerAddress = serverIP;
+                    ServerIP = serverIP;
                     ServerPort = serverPort;
-                    ConnectedToServerEndPoint?.Invoke(true, serverIP, serverPort);
+                    ClientConnectedToEndPoint?.Invoke(this, true, serverIP, serverPort);
                     return;
                 }
 #pragma warning disable CS0168
                 catch (Exception ex)
 #pragma warning restore CS0168
                 {
-                    ConnectedToServerEndPoint?.Invoke(false, serverIP, serverPort);
+                    ClientConnectedToEndPoint?.Invoke(this, false, serverIP, serverPort);
                 }
                 logicClient = new();
             }
