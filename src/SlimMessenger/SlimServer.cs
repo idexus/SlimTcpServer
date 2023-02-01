@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Diagnostics;
 using System.Threading;
 
 namespace SlimMessenger;
@@ -79,7 +80,7 @@ public class SlimServer
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Debug.WriteLine(ex.Message);
         }
 
         foreach (var client in clientDictionary.Values)

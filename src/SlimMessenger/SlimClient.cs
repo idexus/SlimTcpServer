@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 
 namespace SlimMessenger;
 
@@ -101,7 +102,7 @@ public class SlimClient
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Debug.WriteLine(ex.Message);
         }
 
         cancellationTokenSource.Cancel();
