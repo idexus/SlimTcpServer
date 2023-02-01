@@ -179,7 +179,7 @@ public class SlimClient
             cancellationToken = cancellationTokenSource.Token;
         }
 
-        await messagesSemaphore.WaitAsync(cancellationTokenSource.Token);
+        await messagesSemaphore.WaitAsync(cancellationToken);
         messagesQueue.TryDequeue(out var result);
         return result!;
     }
