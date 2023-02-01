@@ -34,10 +34,10 @@ class Program
     static void Server_ClientConnected(SlimClient client)
     {
         Console.WriteLine($"Client connected: {client.Guid}");
-        _ = ClientRunLoop(client);
+        client.RunLoop += Client_RunLoop;
     }
 
-    static async Task ClientRunLoop(SlimClient client)
+    static async Task Client_RunLoop(SlimClient client)
     {
         await client.WriteAsync($"Hello, your Guid: {client.Guid}");
         while (client.IsConnected)

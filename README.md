@@ -39,10 +39,10 @@ class Program
     static void Server_ClientConnected(SlimClient client)
     {
         Console.WriteLine($"Client connected: {client.Guid}");
-        _ = ClientRunLoop(client);
+        client.RunLoop += Client_RunLoop;
     }
 
-    static async Task ClientRunLoop(SlimClient client)
+    static async Task Client_RunLoop(SlimClient client)
     {
         await client.WriteAsync($"Hello, your Guid: {client.Guid}");
         while (client.IsConnected)
@@ -79,11 +79,12 @@ class Program
         client.Disconnected += client => Console.WriteLine("Client disconnected");
         client.ConnectedToEndPoint += Client_ConnectedToEndPoint;
         client.Connected += client => Console.WriteLine("Client connected");
+        client.RunLoop += Client_RunLoop;
 
         try
         {
             client.Connect("127.0.0.1").Wait();
-            ClientRunLoop(client).Wait();
+            client.WaitForDisconnection();
         }
         catch (Exception ex)
         {
@@ -98,7 +99,7 @@ class Program
         return success;
     }
 
-    static async Task ClientRunLoop(SlimClient client)
+    static async Task Client_RunLoop(SlimClient client)
     {
         var serverMessage = await client.ReadAsync();
         Console.WriteLine(serverMessage);

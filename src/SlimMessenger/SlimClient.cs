@@ -19,6 +19,9 @@ public class SlimClient
     readonly ConcurrentQueue<string> messagesQueue = new ConcurrentQueue<string>();
     TcpClient logicClient;
     CancellationTokenSource cancellationTokenSource;
+    SemaphoreSlim messagesSemaphore = new SemaphoreSlim(0);
+    Task? runLoop;
+    Task? receiveRunLoop;
 
     // public
 
@@ -29,10 +32,14 @@ public class SlimClient
     public event ClientEventHandler? Connected;
     public event ClientEventHandler? Disconnected;
     public event ConnectedToEndPointEventHandler? ConnectedToEndPoint;
+    public event ClientRunLoop? RunLoop;
 
     public bool IsConnected => logicClient.Connected && !cancellationTokenSource.IsCancellationRequested;
 
     public void Disconnect() => cancellationTokenSource.Cancel();
+
+    public Task? WaitForDisconnectionAsync() => Task.WhenAll(receiveRunLoop!, runLoop ?? Task.CompletedTask);
+    public void WaitForDisconnection() => Task.WaitAll(receiveRunLoop!, runLoop ?? Task.CompletedTask);
 
     // constructors
 
@@ -99,14 +106,13 @@ public class SlimClient
     internal void StartRunLoop()
     {
         messagesSemaphore = new SemaphoreSlim(0);
-        _ = ReceiveRunLoop();
+        Connected?.Invoke(this);
+        runLoop = RunLoop?.Invoke(this);
+        receiveRunLoop = ReceiveRunLoop();
     }
 
-    SemaphoreSlim messagesSemaphore = new SemaphoreSlim(0);
     async Task ReceiveRunLoop()
     {
-        Connected?.Invoke(this);
-
         var buffer = new byte[1_024];
         string partialMessage = "";
         try
