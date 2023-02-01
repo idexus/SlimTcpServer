@@ -88,7 +88,10 @@ public class SlimClient
                     ServerPort = serverPort;
                     var success = true;
                     if (ConnectedToEndPoint != null)
+                    {
+                        await Task.Delay(1000);
                         success = await ConnectedToEndPoint!.Invoke(this, true, serverIP, serverPort);
+                    }
                     if (success) return;
                 }
 #pragma warning disable CS0168
