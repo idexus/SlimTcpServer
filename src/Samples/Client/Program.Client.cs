@@ -14,8 +14,6 @@ class Program
         var client = new SlimClient();
 
         client.ClientDisconnected += client => Console.WriteLine("Client disconnected");
-        client.ClientConnectedToEndPoint += (client, success, serverIP, serverPort)
-            => Console.WriteLine($"Client connected to end point: {success} - {serverIP} port: {serverPort}");
         client.ClientConnected += client => Console.WriteLine("Client connected");
 
         try

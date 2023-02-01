@@ -26,7 +26,6 @@ public class SlimClient
 
     public event ClientEventHandler? ClientConnected;
     public event ClientEventHandler? ClientDisconnected;
-    public event ClientConnectedToEndPointEventHandler? ClientConnectedToEndPoint;
 
     public bool IsConnected => logicClient.Connected && !cancellationTokenSource.IsCancellationRequested;
 
@@ -49,21 +48,21 @@ public class SlimClient
 
     // conection methods
 
-    public Task Connect(string serverAddress, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
-        => Connect(new IPAddress[] { IPAddress.Parse(serverAddress) }, new[] { serverPort }, timeout);
+    public Task Connect(string serverAddress, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout, ClientConnectedToEndPointHandler? clientConnectedToEndPoint = null)
+        => Connect(new IPAddress[] { IPAddress.Parse(serverAddress) }, new[] { serverPort }, timeout, clientConnectedToEndPoint);
 
-    public Task Connect(IPAddress serverIP, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
-        => Connect(new IPAddress[] { serverIP }, new[] { serverPort }, timeout);
+    public Task Connect(IPAddress serverIP, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout, ClientConnectedToEndPointHandler? clientConnectedToEndPoint = null)
+        => Connect(new IPAddress[] { serverIP }, new[] { serverPort }, timeout, clientConnectedToEndPoint);
 
-    public async Task Connect(IPAddress[] serverIPs, int[] serverPorts, int timeout = DefaultTimeout)
+    public async Task Connect(IPAddress[] serverIPs, int[] serverPorts, int timeout = DefaultTimeout, ClientConnectedToEndPointHandler? clientConnectedToEndPoint = null)
     {
-        await ConnectToEndPoint(serverIPs, serverPorts, timeout);
+        await ConnectToEndPoint(serverIPs, serverPorts, timeout, clientConnectedToEndPoint);
         if (!logicClient.Connected) throw new SocketException();
 
         StartRunLoop();
     }
 
-    async Task ConnectToEndPoint(IPAddress[] serverIPs, int[] serverPorts, int timeout)
+    async Task ConnectToEndPoint(IPAddress[] serverIPs, int[] serverPorts, int timeout, ClientConnectedToEndPointHandler? clientConnectedToEndPoint)
     {
         foreach (var serverIP in serverIPs)
             foreach (var serverPort in serverPorts)
@@ -77,14 +76,18 @@ public class SlimClient
                     await logicClient.ConnectAsync(ipEndPoint, connectionCancellationToken);
                     ServerIP = serverIP;
                     ServerPort = serverPort;
-                    ClientConnectedToEndPoint?.Invoke(this, true, serverIP, serverPort);
-                    return;
+                    var success = true;
+                    if (clientConnectedToEndPoint != null)
+                        await clientConnectedToEndPoint!.Invoke(this, ref success, serverIP, serverPort);
+                    if (success) return;
                 }
 #pragma warning disable CS0168
                 catch (Exception ex)
 #pragma warning restore CS0168
                 {
-                    ClientConnectedToEndPoint?.Invoke(this, false, serverIP, serverPort);
+                    var success = false;
+                    if (clientConnectedToEndPoint != null)
+                        await clientConnectedToEndPoint!.Invoke(this, ref success, serverIP, serverPort);
                 }
                 logicClient = new();
             }
