@@ -11,4 +11,4 @@ public delegate void ServerEventHandler(SlimServer server);
 public delegate void ClientEventHandler(SlimClient client);
 public delegate Task ClientRunLoop(SlimClient client);
 
-public delegate Task ClientConnectedToEndPointHandler(SlimClient client, ref bool success, IPAddress serverIP, int serverPort);
+public delegate Task<bool> ClientConnectedToEndPointEventHandler(SlimClient client, bool success, IPAddress serverIP, int serverPort);
