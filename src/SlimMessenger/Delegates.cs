@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace SlimMessenger;
+﻿namespace SlimMessenger;
 
 // server
 
