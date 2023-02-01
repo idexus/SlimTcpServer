@@ -26,9 +26,9 @@ public class SlimClient
     public IPAddress? ServerIP { get; private set; }
     public int? ServerPort { get; private set; }
 
-    public event ClientEventHandler? ClientConnected;
-    public event ClientEventHandler? ClientDisconnected;
-    public event ClientConnectedToEndPointEventHandler? ClientConnectedToEndPoint;
+    public event ClientEventHandler? Connected;
+    public event ClientEventHandler? Disconnected;
+    public event ConnectedToEndPointEventHandler? ConnectedToEndPoint;
 
     public bool IsConnected => logicClient.Connected && !cancellationTokenSource.IsCancellationRequested;
 
@@ -80,8 +80,8 @@ public class SlimClient
                     ServerIP = serverIP;
                     ServerPort = serverPort;
                     var success = true;
-                    if (ClientConnectedToEndPoint != null)
-                        success = await ClientConnectedToEndPoint!.Invoke(this, true, serverIP, serverPort);
+                    if (ConnectedToEndPoint != null)
+                        success = await ConnectedToEndPoint!.Invoke(this, true, serverIP, serverPort);
                     if (!success) logicClient.Close();
                     if (success) return;
                 }
@@ -89,8 +89,8 @@ public class SlimClient
                 catch (Exception ex)
 #pragma warning restore CS0168
                 {
-                    if (ClientConnectedToEndPoint != null)
-                        _ = await ClientConnectedToEndPoint!.Invoke(this, false, serverIP, serverPort);
+                    if (ConnectedToEndPoint != null)
+                        _ = await ConnectedToEndPoint!.Invoke(this, false, serverIP, serverPort);
                 }
                 logicClient = new();
             }
@@ -105,7 +105,7 @@ public class SlimClient
     SemaphoreSlim messagesSemaphore = new SemaphoreSlim(0);
     async Task ReceiveRunLoop()
     {
-        ClientConnected?.Invoke(this);
+        Connected?.Invoke(this);
 
         var buffer = new byte[1_024];
         string partialMessage = "";
@@ -139,7 +139,7 @@ public class SlimClient
         cancellationTokenSource.Cancel();
         logicClient.Close();
 
-        ClientDisconnected?.Invoke(this);
+        Disconnected?.Invoke(this);
     }
 
     public async Task WriteAsync(string dataString, int? timeout = null)

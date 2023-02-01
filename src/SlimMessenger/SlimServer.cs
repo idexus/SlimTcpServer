@@ -64,8 +64,8 @@ public class SlimServer
                 var clientSlim = new SlimClient(client, clientGuid, CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token));
                 clientDictionary[clientGuid] = clientSlim;
 
-                clientSlim.ClientConnected += e => ClientConnected?.Invoke(e);
-                clientSlim.ClientDisconnected += e =>
+                clientSlim.Connected += e => ClientConnected?.Invoke(e);
+                clientSlim.Disconnected += e =>
                 {
                     clientDictionary.Remove(clientGuid, out _);
                     ClientDisconnected?.Invoke(e);

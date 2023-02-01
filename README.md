@@ -39,7 +39,7 @@ class Program
     static void Server_ClientConnected(SlimClient client)
     {
         Console.WriteLine($"Client connected: {client.Guid}");
-        Task.Run(() => ClientRunLoop(client));
+        _ = ClientRunLoop(client);
     }
 
     static async Task ClientRunLoop(SlimClient client)
@@ -76,18 +76,26 @@ class Program
 
         var client = new SlimClient();
 
-        client.ClientConnected += client => Console.WriteLine("Client connected");
-        client.ClientDisconnected += client => Console.WriteLine("Client disconnected");
+        client.Disconnected += client => Console.WriteLine("Client disconnected");
+        client.ConnectedToEndPoint += Client_ConnectedToEndPoint;
+        client.Connected += client => Console.WriteLine("Client connected");
 
         try
         {
             client.Connect("127.0.0.1").Wait();
-            Task.Run(() => ClientRunLoop(client)).Wait();
+            ClientRunLoop(client).Wait();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private static async Task<bool> Client_ConnectedToEndPoint(SlimClient client, bool success, IPAddress serverIP, int serverPort)
+    {
+        Console.WriteLine($"address: {serverIP} port: {serverPort} success: {(success ? "YES" : "NO")}");
+        await Task.Delay(100); // do some connection stuff
+        return success;
     }
 
     static async Task ClientRunLoop(SlimClient client)
@@ -111,6 +119,7 @@ Client side
 
 ```
 SlimMessenger - Client
+address: 127.0.0.1 port: 5095 success: YES
 Client connected
 Hello, your Guid: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 Hello, I'm your client
