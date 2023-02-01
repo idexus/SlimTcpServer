@@ -136,15 +136,37 @@ public class SlimClient
         ClientDisconnected?.Invoke(this);
     }
 
-    public async Task WriteAsync(string dataString)
+    public async Task WriteAsync(string dataString, int? timeout = null)
     {
+        CancellationToken cancellationToken;
+        if (timeout != null)
+        {
+            var timeoutCancellationToken = new CancellationTokenSource((int)timeout).Token;
+            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
+        }
+        else
+        {
+            cancellationToken = cancellationTokenSource.Token;
+        }
+
         dataString += "\0";
         var messageBytes = Encoding.UTF8.GetBytes(dataString);
-        if (logicClient.Connected) await logicClient.GetStream().WriteAsync(messageBytes, cancellationTokenSource.Token);
+        if (logicClient.Connected) await logicClient.GetStream().WriteAsync(messageBytes, cancellationToken);
     }
 
-    public async Task<string> ReadAsync()
+    public async Task<string> ReadAsync(int? timeout = null)
     {
+        CancellationToken cancellationToken;
+        if (timeout != null)
+        {
+            var timeoutCancellationToken = new CancellationTokenSource((int)timeout).Token;
+            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
+        }
+        else
+        {
+            cancellationToken = cancellationTokenSource.Token;
+        }
+
         await messagesSemaphore.WaitAsync(cancellationTokenSource.Token);
         messagesQueue.TryDequeue(out var result);
         return result!;
