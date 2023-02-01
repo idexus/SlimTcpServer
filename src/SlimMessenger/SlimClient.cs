@@ -78,7 +78,7 @@ public class SlimClient
             foreach (var serverPort in serverPorts)
             {
                 try
-                {
+                {                    
                     var timeoutCancellationToken = new CancellationTokenSource(timeout).Token;
                     var connectionCancellationToken
                         = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
@@ -89,16 +89,16 @@ public class SlimClient
                     var success = true;
                     if (ConnectedToEndPoint != null)
                         success = await ConnectedToEndPoint!.Invoke(this, true, serverIP, serverPort);
-                    if (!success) logicClient.Close();
                     if (success) return;
                 }
 #pragma warning disable CS0168
                 catch (Exception ex)
 #pragma warning restore CS0168
                 {
-                    if (ConnectedToEndPoint != null)
+                    if (ConnectedToEndPoint != null && !logicClient.Connected)
                         _ = await ConnectedToEndPoint!.Invoke(this, false, serverIP, serverPort);
                 }
+                if (logicClient.Connected) logicClient.Close();
                 logicClient = new();
             }
     }
