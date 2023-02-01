@@ -14,7 +14,7 @@ class Program
 
             var server = new SlimServer();
 
-            server.ServerStarted += server => Console.WriteLine($"Server started");
+            server.ServerStarted += server => Console.WriteLine($"Server started on port: {server.ServerPort}");
             server.ServerStopped += server => Console.WriteLine($"Server stopped");
             server.ClientConnected += client => Server_ClientConnected(client);
             server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");           
@@ -34,10 +34,10 @@ class Program
     static void Server_ClientConnected(SlimClient client)
     {
         Console.WriteLine($"Client connected: {client.Guid}");
-        client.RunLoop += Client_RunLoop;
+        _ = ClientRunLoop(client);
     }
 
-    static async Task Client_RunLoop(SlimClient client)
+    static async Task ClientRunLoop(SlimClient client)
     {
         await client.WriteAsync($"Hello, your Guid: {client.Guid}");
         while (client.IsConnected)

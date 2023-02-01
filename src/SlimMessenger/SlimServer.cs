@@ -22,6 +22,8 @@ public class SlimServer
     public event ClientEventHandler? ClientConnected;
     public event ClientEventHandler? ClientDisconnected;
 
+
+    public int ServerPort { get; private set; }
     public bool IsRunning { get; private set; }
 
     public bool IsStopRequested => cancellationTokenSource.IsCancellationRequested;
@@ -30,6 +32,7 @@ public class SlimServer
 
     public SlimServer(int serverPort = DefaultServerPort)
     {
+        ServerPort = serverPort;
         cancellationTokenSource = new CancellationTokenSource();
 
         var ipEndPoint = new IPEndPoint(IPAddress.Any, serverPort);

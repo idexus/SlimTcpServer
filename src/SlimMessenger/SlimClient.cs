@@ -20,8 +20,6 @@ public class SlimClient
     TcpClient logicClient;
     CancellationTokenSource cancellationTokenSource;
     SemaphoreSlim messagesSemaphore = new SemaphoreSlim(0);
-    Task? runLoop;
-    Task? receiveRunLoop;
 
     // public
 
@@ -31,15 +29,10 @@ public class SlimClient
 
     public event ClientEventHandler? Connected;
     public event ClientEventHandler? Disconnected;
-    public event ConnectedToEndPointEventHandler? ConnectedToEndPoint;
-    public event ClientRunLoop? RunLoop;
 
     public bool IsConnected => logicClient.Connected && !cancellationTokenSource.IsCancellationRequested;
 
     public void Disconnect() => cancellationTokenSource.Cancel();
-
-    public Task? WaitForDisconnectionAsync() => Task.WhenAll(receiveRunLoop!, runLoop ?? Task.CompletedTask);
-    public void WaitForDisconnection() => Task.WaitAll(receiveRunLoop!, runLoop ?? Task.CompletedTask);
 
     // constructors
 
@@ -59,59 +52,25 @@ public class SlimClient
     // conection methods
 
     public Task Connect(string serverAddress, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
-        => Connect(new IPAddress[] { IPAddress.Parse(serverAddress) }, new[] { serverPort }, timeout);
+        => Connect(IPAddress.Parse(serverAddress), serverPort, timeout);
 
-    public Task Connect(IPAddress serverIP, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
-        => Connect(new IPAddress[] { serverIP }, new[] { serverPort }, timeout);
-
-    public async Task Connect(IPAddress[] serverIPs, int[] serverPorts, int timeout = DefaultTimeout)
+    public async Task Connect(IPAddress serverIP, int serverPort = SlimServer.DefaultServerPort, int timeout = DefaultTimeout)
     {
-        await ConnectToEndPoint(serverIPs, serverPorts, timeout);
-        if (!logicClient.Connected) throw new NoConnectionException();
+        var timeoutCancellationToken = new CancellationTokenSource(timeout).Token;
+        var connectionCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
+        var ipEndPoint = new IPEndPoint(serverIP, serverPort)!;
+        await logicClient.ConnectAsync(ipEndPoint, connectionCancellationToken);
+        ServerIP = serverIP;
+        ServerPort = serverPort;
 
         StartRunLoop();
-    }
-
-    async Task ConnectToEndPoint(IPAddress[] serverIPs, int[] serverPorts, int timeout)
-    {
-        foreach (var serverIP in serverIPs)
-            foreach (var serverPort in serverPorts)
-            {
-                try
-                {                    
-                    var timeoutCancellationToken = new CancellationTokenSource(timeout).Token;
-                    var connectionCancellationToken
-                        = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
-                    var ipEndPoint = new IPEndPoint(serverIP, serverPort)!;
-                    await logicClient.ConnectAsync(ipEndPoint, connectionCancellationToken);
-                    ServerIP = serverIP;
-                    ServerPort = serverPort;
-                    var success = true;
-                    if (ConnectedToEndPoint != null)
-                    {
-                        await Task.Delay(1000);
-                        success = await ConnectedToEndPoint!.Invoke(this, true, serverIP, serverPort);
-                    }
-                    if (success) return;
-                }
-#pragma warning disable CS0168
-                catch (Exception ex)
-#pragma warning restore CS0168
-                {
-                    if (ConnectedToEndPoint != null && !logicClient.Connected)
-                        _ = await ConnectedToEndPoint!.Invoke(this, false, serverIP, serverPort);
-                }
-                if (logicClient.Connected) logicClient.Close();
-                logicClient = new();
-            }
     }
 
     internal void StartRunLoop()
     {
         messagesSemaphore = new SemaphoreSlim(0);
         Connected?.Invoke(this);
-        runLoop = RunLoop?.Invoke(this);
-        receiveRunLoop = ReceiveRunLoop();
+        _ = ReceiveRunLoop();
     }
 
     async Task ReceiveRunLoop()
@@ -120,7 +79,7 @@ public class SlimClient
         string partialMessage = "";
         try
         {
-            while (!cancellationTokenSource.IsCancellationRequested)
+            while (IsConnected)
             {
                 int bytesReceived = await logicClient.GetStream().ReadAsync(buffer, cancellationTokenSource.Token);
                 if (bytesReceived == 0) break;

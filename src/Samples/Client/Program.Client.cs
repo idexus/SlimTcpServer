@@ -14,14 +14,12 @@ class Program
         var client = new SlimClient();
 
         client.Disconnected += client => Console.WriteLine("Client disconnected");
-        client.ConnectedToEndPoint += Client_ConnectedToEndPoint;
         client.Connected += client => Console.WriteLine("Client connected");
-        client.RunLoop += Client_RunLoop;
 
         try
         {
             client.Connect("127.0.0.1").Wait();
-            client.WaitForDisconnection();
+            ClientRunLoop(client).Wait();
         }
         catch (Exception ex)
         {
@@ -29,14 +27,7 @@ class Program
         }
     }
 
-    private static async Task<bool> Client_ConnectedToEndPoint(SlimClient client, bool success, IPAddress serverIP, int serverPort)
-    {
-        Console.WriteLine($"address: {serverIP} port: {serverPort} success: {(success ? "YES" : "NO")}");
-        await Task.Delay(100); // do some connection stuff
-        return success;
-    }
-
-    static async Task Client_RunLoop(SlimClient client)
+    static async Task ClientRunLoop(SlimClient client)
     {
         var serverMessage = await client.ReadAsync();
         Console.WriteLine(serverMessage);

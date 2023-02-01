@@ -4,6 +4,48 @@ A simple TCP string messenger
 
 # Example Usage
 
+## Client
+
+```cs
+using SlimMessenger;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("SlimMessenger - Client");
+
+        var client = new SlimClient();
+
+        client.Disconnected += client => Console.WriteLine("Client disconnected");
+        client.Connected += client => Console.WriteLine("Client connected");
+
+        try
+        {
+            client.Connect("127.0.0.1").Wait();
+            ClientRunLoop(client).Wait();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    static async Task ClientRunLoop(SlimClient client)
+    {
+        var serverMessage = await client.ReadAsync();
+        Console.WriteLine(serverMessage);
+        while (client.IsConnected)
+        {
+            var sendMsg = Console.ReadLine()!;
+            sendMsg = sendMsg.Replace('`', '\0');
+            if (sendMsg == "") client.Disconnect();
+            client.WriteAsync(sendMsg).Wait();
+        }
+    }
+}
+```
+
 ## Server
 
 ```cs
@@ -19,7 +61,7 @@ class Program
 
             var server = new SlimServer();
 
-            server.ServerStarted += server => Console.WriteLine($"Server started");
+            server.ServerStarted += server => Console.WriteLine($"Server started on port: {server.ServerPort}");
             server.ServerStopped += server => Console.WriteLine($"Server stopped");
             server.ClientConnected += client => Server_ClientConnected(client);
             server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");           
@@ -39,10 +81,10 @@ class Program
     static void Server_ClientConnected(SlimClient client)
     {
         Console.WriteLine($"Client connected: {client.Guid}");
-        client.RunLoop += Client_RunLoop;
+        _ = ClientRunLoop(client);
     }
 
-    static async Task Client_RunLoop(SlimClient client)
+    static async Task ClientRunLoop(SlimClient client)
     {
         await client.WriteAsync($"Hello, your Guid: {client.Guid}");
         while (client.IsConnected)
@@ -58,57 +100,6 @@ class Program
             {
                 await client.WriteAsync("Lets play");
             }
-        }
-    }
-}
-```
-
-## Client
-
-```cs
-using SlimMessenger;
-
-class Program
-{
-    static void Main(string[] args)
-    {
-        Console.WriteLine("SlimMessenger - Client");
-
-        var client = new SlimClient();
-
-        client.Disconnected += client => Console.WriteLine("Client disconnected");
-        client.ConnectedToEndPoint += Client_ConnectedToEndPoint;
-        client.Connected += client => Console.WriteLine("Client connected");
-        client.RunLoop += Client_RunLoop;
-
-        try
-        {
-            client.Connect("127.0.0.1").Wait();
-            client.WaitForDisconnection();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    private static async Task<bool> Client_ConnectedToEndPoint(SlimClient client, bool success, IPAddress serverIP, int serverPort)
-    {
-        Console.WriteLine($"address: {serverIP} port: {serverPort} success: {(success ? "YES" : "NO")}");
-        await Task.Delay(100); // do some connection stuff
-        return success;
-    }
-
-    static async Task Client_RunLoop(SlimClient client)
-    {
-        var serverMessage = await client.ReadAsync();
-        Console.WriteLine(serverMessage);
-        while (client.IsConnected)
-        {
-            var sendMsg = Console.ReadLine()!;
-            sendMsg = sendMsg.Replace('`', '\0');
-            if (sendMsg == "") client.Disconnect();
-            client.WriteAsync(sendMsg).Wait();
         }
     }
 }
