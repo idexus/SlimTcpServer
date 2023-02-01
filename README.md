@@ -111,7 +111,6 @@ Client side
 
 ```
 SlimMessenger - Client
-address: 127.0.0.1 port: 5095 success: YES
 Client connected
 Hello, your Guid: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 Hello, I'm your client
