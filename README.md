@@ -124,7 +124,7 @@ Server side
 
 ```
 SlimMessenger - Server
-Server started
+Server started on port: 5085
 Client connected: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "Hello, I'm your client"
 Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "This is"
