@@ -3,13 +3,13 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using SlimMessenger;
+using SlimTcpServer;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("SlimMessenger - Client");
+        Console.WriteLine("SlimTcpServer - Client");
 
         var client = new SlimClient();
 

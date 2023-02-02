@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Diagnostics;
 using System.Threading;
 
-namespace SlimMessenger;
+namespace SlimTcpServer;
 
 public class SlimServer
 {

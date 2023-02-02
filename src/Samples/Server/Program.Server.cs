@@ -2,7 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
-using SlimMessenger;
+using SlimTcpServer;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            Console.WriteLine("SlimMessenger - Server");
+            Console.WriteLine("SlimTcpServer - Server");
 
             var server = new SlimServer();
 

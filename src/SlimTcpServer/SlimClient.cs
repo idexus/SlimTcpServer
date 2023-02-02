@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Diagnostics;
 
-namespace SlimMessenger;
+namespace SlimTcpServer;
 
 public class NoConnectionException : Exception { }
 

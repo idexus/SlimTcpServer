@@ -1,4 +1,4 @@
-﻿namespace SlimMessenger;
+﻿namespace SlimTcpServer;
 
 // server
 

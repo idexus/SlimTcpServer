@@ -5,16 +5,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <PackageId>SlimMessenger</PackageId>
+    <PackageId>SlimTcpServer</PackageId>
 	<Version>0.2.0-alpha.1</Version>
 	<Authors>Pawel Krzywdzinski</Authors>
 	<Copyright>Pawel Krzywdzinski</Copyright>
-	<PackageDescription>A simple TCP string messenger</PackageDescription>
+	<PackageDescription>A simple TCP sever and client library</PackageDescription>
 	<Company></Company>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-	<AssemblyName>SlimMessenger</AssemblyName>
+	<AssemblyName>SlimTcpServer</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-# SlimMessenger
+# SlimTcpServer 
 
 A simple TCP string messenger
 
@@ -7,13 +7,13 @@ A simple TCP string messenger
 ## Client
 
 ```cs
-using SlimMessenger;
+using SlimTcpServer ;
 
 class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("SlimMessenger - Client");
+        Console.WriteLine("SlimTcpServer  - Client");
 
         var client = new SlimClient();
 
@@ -49,7 +49,7 @@ class Program
 ## Server
 
 ```cs
-using SlimMessenger;
+using SlimTcpServer ;
 
 class Program
 {
@@ -57,7 +57,7 @@ class Program
     {
         try
         {
-            Console.WriteLine("SlimMessenger - Server");
+            Console.WriteLine("SlimTcpServer  - Server");
 
             var server = new SlimServer();
 
@@ -110,7 +110,7 @@ class Program
 Client side
 
 ```
-SlimMessenger - Client
+SlimTcpServer  - Client
 Client connected
 Hello, your Guid: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 Hello, I'm your client
@@ -123,7 +123,7 @@ Client disconnected
 Server side
 
 ```
-SlimMessenger - Server
+SlimTcpServer  - Server
 Server started on port: 5085
 Client connected: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "Hello, I'm your client"
