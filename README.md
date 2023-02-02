@@ -136,6 +136,18 @@ The operation was canceled.
 Client disconnected: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 ```
 
+# Nuget
+
+.Net CLI
+
+```
+dotnet add package SlimTcpServer --version 0.2.0-beta.1
+```
+
+# Disclaimer
+
+There is no official support. Use at your own risk.
+
 # License 
 
 [MIT License](LICENSE), Copyright (c) 2023 Pawel Krzywdzinski
