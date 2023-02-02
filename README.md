@@ -1,6 +1,6 @@
 # SlimTcpServer
 
-A simple TCP string messenger
+A slim TCP server and client library
 
 # Example Usage
 

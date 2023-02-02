@@ -1,6 +1,6 @@
 # SlimTcpServer
 
-A simple TCP server and client library
+A slim TCP server and client library
 
 # License 
 
