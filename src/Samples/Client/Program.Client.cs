@@ -35,8 +35,17 @@ class Program
         {
             var sendMsg = Console.ReadLine()!;
             sendMsg = sendMsg.Replace('`', '\0');
-            if (sendMsg == "") client.Disconnect();
-            client.WriteAsync(sendMsg).Wait();
+            if (sendMsg == "")
+            {
+                await client.Disconnect();
+                return;
+            }            
+            await client.WriteAsync(sendMsg);
+            if (sendMsg == "play")
+            {
+                var message = await client.ReadAsync();
+                Console.WriteLine(message);
+            }
         }
     }
 }

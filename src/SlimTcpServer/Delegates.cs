@@ -1,9 +1,10 @@
-﻿namespace SlimTcpServer;
+﻿namespace SlimTcpServer
+{
+    // server
 
-// server
+    public delegate void ServerEventHandler(SlimServer server);
 
-public delegate void ServerEventHandler(SlimServer server);
+    // client
 
-// client
-
-public delegate void ClientEventHandler(SlimClient client);
+    public delegate void ClientEventHandler(SlimClient client);
+}

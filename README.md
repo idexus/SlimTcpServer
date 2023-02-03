@@ -39,8 +39,17 @@ class Program
         {
             var sendMsg = Console.ReadLine()!;
             sendMsg = sendMsg.Replace('`', '\0');
-            if (sendMsg == "") client.Disconnect();
-            client.WriteAsync(sendMsg).Wait();
+            if (sendMsg == "")
+            {
+                await client.Disconnect();
+                return;
+            }            
+            await client.WriteAsync(sendMsg);
+            if (sendMsg == "play")
+            {
+                var message = await client.ReadAsync();
+                Console.WriteLine(message);
+            }
         }
     }
 }
@@ -94,7 +103,7 @@ class Program
             if (message == "close")
             {
                 Console.WriteLine($"Client close request");
-                client.Disconnect();
+                await client.Disconnect();
             }
             else if (message == "play")
             {
@@ -132,7 +141,6 @@ Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "a test"
 Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "play"
 Client: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c, data received : "close"
 Client close request
-The operation was canceled.
 Client disconnected: 1eb630fa-148d-41d4-a7c9-7c9f0a1d014c
 ```
 

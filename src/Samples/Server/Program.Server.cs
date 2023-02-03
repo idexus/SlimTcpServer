@@ -47,7 +47,7 @@ class Program
             if (message == "close")
             {
                 Console.WriteLine($"Client close request");
-                client.Disconnect();
+                await client.Disconnect();
             }
             else if (message == "play")
             {
