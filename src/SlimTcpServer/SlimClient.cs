@@ -153,9 +153,20 @@ namespace SlimTcpServer
             });
         }
 
-        public async Task<string> ReadAsync()
+        public async Task<string> ReadAsync(int? timeout = null)
         {
-            await messagesSemaphore.WaitAsync(cancellationTokenSource.Token);
+            CancellationToken cancellationToken;
+            if (timeout != null)
+            {
+                var timeoutCancellationToken = new CancellationTokenSource((int)timeout).Token;
+                cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, timeoutCancellationToken).Token;
+            }
+            else
+            {
+                cancellationToken = cancellationTokenSource.Token;
+            }
+
+            await messagesSemaphore.WaitAsync(cancellationToken);
             messagesQueue.TryDequeue(out var result);
             return result;
         }
