@@ -35,7 +35,7 @@ namespace SlimTcpServer
 
         public int SendTimeout { get; set; } = DefaultSendTimeout;
 
-        public bool IsConnected => client.Connected;
+        public bool IsConnected => client?.Connected ?? false;
 
         // constructors
 

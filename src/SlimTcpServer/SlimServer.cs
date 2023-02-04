@@ -31,7 +31,7 @@ namespace SlimTcpServer
         public int ServerPort { get; private set; }
         public bool IsRunning { get; private set; }
 
-        public bool IsStopRequested => cancellationTokenSource.IsCancellationRequested;
+        public bool IsStopRequested => cancellationTokenSource?.IsCancellationRequested ?? false;
 
         SemaphoreSlim serverSemaphore = new SemaphoreSlim(1);
         public async Task Start(int serverPort = DefaultPort, int backLog = DefaultBackLog)
