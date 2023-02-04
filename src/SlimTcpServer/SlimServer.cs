@@ -5,6 +5,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
+using System.Reflection;
+
+[assembly: AssemblyKeyFileAttribute("Key.snk")]
 
 namespace SlimTcpServer
 {
