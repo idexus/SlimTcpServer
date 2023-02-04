@@ -27,7 +27,7 @@ class Program
             sever.Start().Wait();
 
             Console.ReadLine();
-            sever.Stop().Wait();ś
+            sever.Stop().Wait();
         }
         catch (Exception ex)
         {
