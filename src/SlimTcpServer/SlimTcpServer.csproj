@@ -2,11 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <!--<ImplicitUsings>enable</ImplicitUsings>-->
-    <!--<Nullable>enable</Nullable>-->
 
     <PackageId>SlimTcpServer</PackageId>
-	<Version>0.2.1-beta.1</Version>
+	<Version>0.2.1-beta.2</Version>
 	<Authors>Pawel Krzywdzinski</Authors>
 	<Copyright>Pawel Krzywdzinski</Copyright>
 	<PackageDescription>A simple TCP sever and client library</PackageDescription>
