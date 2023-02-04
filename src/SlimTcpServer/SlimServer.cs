@@ -16,6 +16,7 @@ namespace SlimTcpServer
         readonly ConcurrentDictionary<Guid, SlimClient> clientDictionary = new ConcurrentDictionary<Guid, SlimClient>();
         Socket server;
         CancellationTokenSource cancellationTokenSource;
+        Task serverRunTask;
 
         // public
 
@@ -32,25 +33,23 @@ namespace SlimTcpServer
 
         public bool IsStopRequested => cancellationTokenSource.IsCancellationRequested;
 
-        public void Stop() => cancellationTokenSource.Cancel(true);
-
         SemaphoreSlim serverSemaphore = new SemaphoreSlim(1);
-        public void Start(int serverPort = DefaultPort, int backLog = DefaultBackLog)
+        public async Task Start(int serverPort = DefaultPort, int backLog = DefaultBackLog)
         {
+            await serverSemaphore.WaitAsync();
+
             ServerPort = serverPort;
-            Task.Run(async () =>
+            var ipEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
+            server = new Socket(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            server.Bind(ipEndPoint);
+            server.Listen(100);
+            IsRunning = true;
+            ServerStarted?.Invoke(this);
+
+            cancellationTokenSource = new CancellationTokenSource();
+
+            serverRunTask = Task.Run(async () =>
             {
-                await serverSemaphore.WaitAsync();
-
-                var ipEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
-                server = new Socket(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                server.Bind(ipEndPoint);
-                server.Listen(100);
-                IsRunning = true;
-                ServerStarted?.Invoke(this);
-
-                cancellationTokenSource = new CancellationTokenSource();
-
                 await Task.Factory.StartNew(RunLoop, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
                 ReleaseResources();
@@ -58,6 +57,12 @@ namespace SlimTcpServer
                 ServerStopped?.Invoke(this);
                 serverSemaphore.Release();
             });
+        }
+
+        public async Task Stop()
+        {
+            cancellationTokenSource.Cancel();
+            if (serverRunTask != null) await serverRunTask;
         }
 
         public void ReleaseResources()

@@ -19,11 +19,10 @@ class Program
             server.ClientConnected += client => Server_ClientConnected(client);
             server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");           
 
-            server.Start();
+            server.Start().Wait();
 
             Console.ReadLine();
-            server.Stop();
-            while (server.IsRunning) Console.ReadLine();
+            server.Stop().Wait();
         }
         catch (Exception ex)
         {
