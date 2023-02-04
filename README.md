@@ -4,6 +4,64 @@ A simple TCP server and client library
 
 # Example Usage
 
+## Server
+
+```cs
+using SlimTcpServer;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        try
+        {
+            Console.WriteLine("SlimTcpServer - Server");
+
+            var sever = new SlimServer();
+
+            sever.ServerStarted += server => Console.WriteLine($"Server started on port: {server.ServerPort}");
+            sever.ServerStopped += server => Console.WriteLine($"Server stopped");
+            sever.ClientConnected += client => Server_ClientConnected(client);
+            sever.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");
+
+            sever.Start().Wait();
+
+            Console.ReadLine();
+            sever.Stop().Wait();ś
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    static void Server_ClientConnected(SlimClient client)
+    {
+        Console.WriteLine($"Client connected: {client.Guid}");
+        _ = ClientRunLoop(client);
+    }
+
+    static async Task ClientRunLoop(SlimClient client)
+    {
+        await client.WriteAsync($"Hello, your Guid: {client.Guid}");
+        while (client.IsConnected)
+        {
+            var message = await client.ReadAsync();
+            Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
+            if (message == "close")
+            {
+                Console.WriteLine($"Client close request");
+                await client.Disconnect();
+            }
+            else if (message == "play")
+            {
+                await client.WriteAsync("Lets play");
+            }
+        }
+    }
+}
+```
+
 ## Client
 
 ```cs
@@ -37,77 +95,18 @@ class Program
         Console.WriteLine(serverMessage);
         while (client.IsConnected)
         {
-            var sendMsg = Console.ReadLine()!;
+            var sendMsg = Console.ReadLine();
             sendMsg = sendMsg.Replace('`', '\0');
             if (sendMsg == "")
             {
                 await client.Disconnect();
                 return;
-            }            
+            }
             await client.WriteAsync(sendMsg);
             if (sendMsg == "play")
             {
                 var message = await client.ReadAsync();
                 Console.WriteLine(message);
-            }
-        }
-    }
-}
-```
-
-## Server
-
-```cs
-using SlimTcpServer;
-
-class Program
-{
-    static void Main(string[] args)
-    {
-        try
-        {
-            Console.WriteLine("SlimTcpServer - Server");
-
-            var server = new SlimServer();
-
-            server.ServerStarted += server => Console.WriteLine($"Server started on port: {server.ServerPort}");
-            server.ServerStopped += server => Console.WriteLine($"Server stopped");
-            server.ClientConnected += client => Server_ClientConnected(client);
-            server.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");           
-
-            server.Start();
-
-            Console.ReadLine();
-            server.Stop();
-            while (server.IsRunning) Console.ReadLine();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    static void Server_ClientConnected(SlimClient client)
-    {
-        Console.WriteLine($"Client connected: {client.Guid}");
-        _ = ClientRunLoop(client);
-    }
-
-    static async Task ClientRunLoop(SlimClient client)
-    {
-        await client.WriteAsync($"Hello, your Guid: {client.Guid}");
-        while (client.IsConnected)
-        {
-            var message = await client.ReadAsync();
-            Console.WriteLine($@"Client: {client.Guid}, data received : ""{message}""");
-            if (message == "close")
-            {
-                Console.WriteLine($"Client close request");
-                await client.Disconnect();
-            }
-            else if (message == "play")
-            {
-                await client.WriteAsync("Lets play");
             }
         }
     }
