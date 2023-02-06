@@ -39,6 +39,8 @@ namespace SlimTcpServer
             {
                 await serverSemaphore.WaitAsync();
 
+                cancellationTokenSource = new CancellationTokenSource();
+
                 ServerPort = serverPort;
                 var ipEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
                 server = new Socket(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -46,12 +48,11 @@ namespace SlimTcpServer
                 server.Listen(100);
                 IsRunning = true;
 
-                cancellationTokenSource = new CancellationTokenSource();
                 ServerStarted?.Invoke(this);
 
                 serverRunTask = Task.Run(async () =>
                 {
-                    await Task.Factory.StartNew(RunLoop, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                    await Task.Factory.StartNew(RunLoop, TaskCreationOptions.LongRunning);
 
                     ReleaseResources();
 
@@ -68,7 +69,7 @@ namespace SlimTcpServer
 
         public async Task StopAsync()
         {
-            cancellationTokenSource.Cancel();
+            cancellationTokenSource?.Cancel();
             if (serverRunTask != null) await serverRunTask;
         }
 
