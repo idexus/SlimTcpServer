@@ -35,27 +35,35 @@ namespace SlimTcpServer
         SemaphoreSlim serverSemaphore = new SemaphoreSlim(1);
         public async Task StartAsync(int serverPort = DefaultPort, int backLog = DefaultBackLog)
         {
-            await serverSemaphore.WaitAsync();
-
-            ServerPort = serverPort;
-            var ipEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
-            server = new Socket(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            server.Bind(ipEndPoint);
-            server.Listen(100);
-            IsRunning = true;
-            ServerStarted?.Invoke(this);
-
-            cancellationTokenSource = new CancellationTokenSource();
-
-            serverRunTask = Task.Run(async () =>
+            try
             {
-                await Task.Factory.StartNew(RunLoop, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                await serverSemaphore.WaitAsync();
 
+                ServerPort = serverPort;
+                var ipEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
+                server = new Socket(ipEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                server.Bind(ipEndPoint);
+                server.Listen(100);
+                IsRunning = true;
+
+                cancellationTokenSource = new CancellationTokenSource();
+                ServerStarted?.Invoke(this);
+
+                serverRunTask = Task.Run(async () =>
+                {
+                    await Task.Factory.StartNew(RunLoop, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+                    ReleaseResources();
+
+                    ServerStopped?.Invoke(this);
+                    serverSemaphore.Release();
+                });
+            }
+            catch (Exception ex)
+            {
                 ReleaseResources();
-
-                ServerStopped?.Invoke(this);
-                serverSemaphore.Release();
-            });
+                throw ex;
+            }
         }
 
         public async Task StopAsync()
@@ -68,7 +76,6 @@ namespace SlimTcpServer
         {            
             if (server != null)
             {
-                if (server.Connected) server.Disconnect(true);
                 server.Close();
                 server.Dispose();
 

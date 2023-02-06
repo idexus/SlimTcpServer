@@ -23,6 +23,7 @@ namespace SlimTcpServer
         Socket client;
         SemaphoreSlim messagesSemaphore = new SemaphoreSlim(0);
         CancellationTokenSource cancellationTokenSource;
+        Task receiveLoop;
 
         // public
 
@@ -65,23 +66,17 @@ namespace SlimTcpServer
             StartRunLoop();
         }
 
-        Task receiveLoop;
-
-        public Task DisconnectAsync()
+        public async Task DisconnectAsync()
         {
-            return Task.Run(async () =>
+            if (client != null)
             {
-                if (client != null)
-                {
-                    cancellationTokenSource.Cancel();
-                    if (receiveLoop != null) await receiveLoop;
-                    if (client.Connected) client.Disconnect(true);                        
-                    client.Close();
-                    client.Dispose();
-                    client = null;
-                    receiveLoop = null;
-                }
-            });
+                cancellationTokenSource.Cancel();
+                if (receiveLoop != null) await receiveLoop;
+                client.Close();
+                client.Dispose();
+                client = null;
+                receiveLoop = null;
+            }
         }
 
         internal void StartRunLoop()
@@ -102,7 +97,7 @@ namespace SlimTcpServer
                     while (!cancellationTokenSource.Token.IsCancellationRequested && IsConnected)
                     {
                         var args = new SocketAsyncEventArgs();
-                        args.SetBuffer(buffer, 0, 1024);                       
+                        args.SetBuffer(buffer, 0, 1024);
                         args.Wait(client.ReceiveAsync, cancellationTokenSource.Token);
                         int bytesReceived = args.BytesTransferred;
                         if (bytesReceived == 0) break;
@@ -128,14 +123,13 @@ namespace SlimTcpServer
                 }
 
                 client.Close();
-
                 Disconnected?.Invoke(this);
             });
         }
 
-        public async Task WriteAsync(string dataString)
+        public Task WriteAsync(string dataString)
         {
-            await Task.Run(() =>
+            return Task.Run(() =>
             {
                 dataString += "\0";
                 var messageBytes = Encoding.UTF8.GetBytes(dataString);
@@ -146,7 +140,7 @@ namespace SlimTcpServer
                     var args = new SocketAsyncEventArgs();
                     args.SetBuffer(messageBytes, 0, messageBytes.Length);
 
-                    args.Wait(client.SendAsync, cancellationTokenSource.Token);                    
+                    args.Wait(client.SendAsync, cancellationTokenSource.Token);
 
                     int sendCount = args.BytesTransferred;
                     if (sendCount != messageBytes.Length) throw new SocketException();
@@ -174,7 +168,8 @@ namespace SlimTcpServer
 
         public void Dispose()
         {
-            ((IDisposable)client).Dispose();
+            client.Dispose();
+            client = null;
         }
     }
 }
