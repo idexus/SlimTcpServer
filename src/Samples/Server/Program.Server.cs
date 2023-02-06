@@ -19,10 +19,10 @@
                 sever.ClientConnected += client => Server_ClientConnected(client);
                 sever.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");
 
-                sever.Start().Wait();
+                sever.StartAsync().Wait();
 
                 Console.ReadLine();
-                sever.Stop().Wait();
+                sever.StopAsync().Wait();
             }
             catch (Exception ex)
             {
@@ -46,7 +46,7 @@
                 if (message == "close")
                 {
                     Console.WriteLine($"Client close request");
-                    await client.Disconnect();
+                    await client.DisconnectAsync();
                 }
                 else if (message == "play")
                 {

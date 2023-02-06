@@ -24,10 +24,10 @@ class Program
             sever.ClientConnected += client => Server_ClientConnected(client);
             sever.ClientDisconnected += client => Console.WriteLine($"Client disconnected: {client.Guid}");
 
-            sever.Start().Wait();
+            sever.StartAsync().Wait();
 
             Console.ReadLine();
-            sever.Stop().Wait();
+            sever.StopAsync().Wait();
         }
         catch (Exception ex)
         {
@@ -51,7 +51,7 @@ class Program
             if (message == "close")
             {
                 Console.WriteLine($"Client close request");
-                await client.Disconnect();
+                await client.DisconnectAsync();
             }
             else if (message == "play")
             {
@@ -80,7 +80,7 @@ class Program
 
         try
         {
-            client.Connect("127.0.0.1").Wait();
+            client.ConnectAsync("127.0.0.1").Wait();
             ClientRunLoop(client).Wait();
         }
         catch (Exception ex)
@@ -99,7 +99,7 @@ class Program
             sendMsg = sendMsg.Replace('`', '\0');
             if (sendMsg == "")
             {
-                await client.Disconnect();
+                await client.DisconnectAsync();
                 return;
             }
             await client.WriteAsync(sendMsg);

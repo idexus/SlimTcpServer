@@ -5,6 +5,7 @@
 
 .DS_Store
 *.snk
+Assembly.cs
 
 # User-specific files
 *.rsuser

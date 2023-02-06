@@ -18,7 +18,7 @@
 
             try
             {
-                client.Connect("127.0.0.1").Wait();
+                client.ConnectAsync("127.0.0.1").Wait();
                 ClientRunLoop(client).Wait();
             }
             catch (Exception ex)
@@ -37,7 +37,7 @@
                 sendMsg = sendMsg.Replace('`', '\0');
                 if (sendMsg == "")
                 {
-                    await client.Disconnect();
+                    await client.DisconnectAsync();
                     return;
                 }
                 await client.WriteAsync(sendMsg);

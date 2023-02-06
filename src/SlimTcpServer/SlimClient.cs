@@ -50,10 +50,10 @@ namespace SlimTcpServer
 
         // conection methods
 
-        public Task Connect(string serverAddress, int serverPort = SlimServer.DefaultPort)
-            => Connect(IPAddress.Parse(serverAddress), serverPort);
+        public Task ConnectAsync(string serverAddress, int serverPort = SlimServer.DefaultPort)
+            => ConnectAsync(IPAddress.Parse(serverAddress), serverPort);
 
-        public async Task Connect(IPAddress serverIP, int serverPort = SlimServer.DefaultPort)
+        public async Task ConnectAsync(IPAddress serverIP, int serverPort = SlimServer.DefaultPort)
         {
             this.cancellationTokenSource = new CancellationTokenSource();
             client = new Socket(SocketType.Stream, ProtocolType.Tcp);
@@ -67,7 +67,7 @@ namespace SlimTcpServer
 
         Task receiveLoop;
 
-        public Task Disconnect()
+        public Task DisconnectAsync()
         {
             return Task.Run(async () =>
             {

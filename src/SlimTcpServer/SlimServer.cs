@@ -5,13 +5,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
-using System.Reflection;
-
-[assembly: AssemblyKeyFileAttribute("Key.snk")]
 
 namespace SlimTcpServer
 {
-
     public class SlimServer : IDisposable
     {
         // private
@@ -37,7 +33,7 @@ namespace SlimTcpServer
         public bool IsStopRequested => cancellationTokenSource?.IsCancellationRequested ?? false;
 
         SemaphoreSlim serverSemaphore = new SemaphoreSlim(1);
-        public async Task Start(int serverPort = DefaultPort, int backLog = DefaultBackLog)
+        public async Task StartAsync(int serverPort = DefaultPort, int backLog = DefaultBackLog)
         {
             await serverSemaphore.WaitAsync();
 
@@ -62,7 +58,7 @@ namespace SlimTcpServer
             });
         }
 
-        public async Task Stop()
+        public async Task StopAsync()
         {
             cancellationTokenSource.Cancel();
             if (serverRunTask != null) await serverRunTask;
