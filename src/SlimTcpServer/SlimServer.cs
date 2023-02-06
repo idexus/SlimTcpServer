@@ -68,12 +68,13 @@ namespace SlimTcpServer
         {            
             if (server != null)
             {
+                if (server.Connected) server.Disconnect(true);
                 server.Close();
+                server.Dispose();
 
                 clientDictionary.Clear();
-                ((IDisposable)server).Dispose();
             }
-            if (cancellationTokenSource != null) ((IDisposable)cancellationTokenSource).Dispose();
+            if (cancellationTokenSource != null) cancellationTokenSource.Dispose();
             server = null;
             cancellationTokenSource = null;
             IsRunning = false;

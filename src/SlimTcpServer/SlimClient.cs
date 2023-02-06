@@ -75,7 +75,8 @@ namespace SlimTcpServer
                 {
                     cancellationTokenSource.Cancel();
                     if (receiveLoop != null) await receiveLoop;
-                    if (client.Connected) client.Close();
+                    if (client.Connected) client.Disconnect(true);                        
+                    client.Close();
                     client.Dispose();
                     client = null;
                     receiveLoop = null;
